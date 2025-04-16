@@ -1,0 +1,6 @@
+@danone_client_HostAddress = http://localhost:5083
+
+GET {{danone_client_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
