@@ -1,5 +1,4 @@
 using danone_client.Models.DTOs;
-using danone_client.Models.Entities;
 using danone_client.Models.Responses;
 
 namespace danone_client.Services

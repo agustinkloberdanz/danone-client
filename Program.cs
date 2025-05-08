@@ -5,6 +5,11 @@ using danone_client.Models;
 using danone_client.Repositories;
 using danone_client.Services;
 using danone_client.Repositories.Interfaces;
+using danone_client.Repositories.Implementations;
+using danone_client.Services.Implementations;
+using danone_client.Services.Interfaces;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.IdentityModel.Tokens;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -28,6 +33,35 @@ builder.Services.AddCors(options =>
     });
 });
 
+builder.Services.AddAuthentication(options =>
+{
+    options.DefaultAuthenticateScheme = "JwtScheme";
+    options.DefaultChallengeScheme = "JwtScheme";
+});
+
+builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+    .AddJwtBearer("JwtScheme", options =>
+    {
+        options.TokenValidationParameters = new TokenValidationParameters
+        {
+            ValidateIssuerSigningKey = true,
+            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["JWT:Key"])),
+            ValidateIssuer = false,
+            ValidateAudience = false
+        };
+    });
+
+builder.Services.AddAuthorization(options =>
+{
+    options.AddPolicy("AccountOnly", policy => policy.RequireClaim("Account"));
+});
+
+builder.Services.AddLogging(loggingBuilder => {
+    loggingBuilder.AddConsole()
+        .AddFilter(DbLoggerCategory.Database.Command.Name, LogLevel.Information);
+    loggingBuilder.AddDebug();
+});
+
 builder.Services.AddDbContext<DBContext>(options =>
 {
     options.UseSqlServer(builder.Configuration.GetConnectionString("DBConnection"), builder =>
@@ -39,11 +73,12 @@ builder.Services.AddDbContext<DBContext>(options =>
 
 //Repositories
 builder.Services.AddScoped<IProductsRepository, ProductsRepository>();
-
+builder.Services.AddScoped<IUsersRepository, UsersRepository>();
 
 //Services
 builder.Services.AddScoped<IProductsService, ProductsService>();
-
+builder.Services.AddScoped<IUsersService, UsersService>();
+builder.Services.AddScoped<IAuthService, AuthService>();
 
 var app = builder.Build();
 

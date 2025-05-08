@@ -1,7 +1,6 @@
 using danone_client.Models;
 using danone_client.Models.Entities;
 using danone_client.Repositories.Interfaces;
-using Microsoft.EntityFrameworkCore;
 
 namespace danone_client.Repositories;
 
